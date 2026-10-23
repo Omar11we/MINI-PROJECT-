@@ -1,0 +1,21 @@
+{
+  "name": "lfrlms-web-ui",
+  "version": "1.0.0",
+  "description": "Browser interface for LFRLMS on MongoDB (runs alongside the Java Swing app, which uses MySQL)",
+  "private": true,
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "migrate": "node scripts/migrate-from-mysql.js"
+  },
+  "dependencies": {
+    "express": "^4.22.3",
+    "mongodb": "^6.21.0",
+    "mysql2": "^3.24.6"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

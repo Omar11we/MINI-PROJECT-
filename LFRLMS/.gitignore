@@ -5,3 +5,8 @@ config/db.properties
 *.class
 out/
 bin/
+
+# Web UI dependencies and local settings
+node_modules/
+.env
+.DS_Store

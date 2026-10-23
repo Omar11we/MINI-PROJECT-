@@ -1,0 +1,18 @@
+# Render blueprint: deploys the web UI (the Java Swing app is not part of this).
+# The database lives on MongoDB Atlas; set MONGO_URL in the Render dashboard.
+services:
+  - type: web
+    name: lfrlms
+    runtime: node
+    rootDir: web-ui
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: MONGO_URL
+        sync: false
+      - key: MONGO_DB
+        value: lfrlms
+      # Render runs in UTC; the app stores and shows local time.
+      - key: TZ
+        value: Asia/Kolkata
