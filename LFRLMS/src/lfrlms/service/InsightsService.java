@@ -9,6 +9,8 @@ import lfrlms.util.QueryLog;
 /**
  * Purpose: Provides read-only schema and query diagnostics to the GUI.
  * Concept: Service and DAO separation.
+ * Layer: Service (business logic).
+ * Rubric: inner/anonymous classes, Collections.
  */
 public class InsightsService {
     private final InsightsDao insightsDao;
@@ -21,39 +23,48 @@ public class InsightsService {
         this.insightsDao = insightsDao;
     }
 
+    /** Returns the table names shown in the schema browser. */
     public ArrayList<String> listTableNames() {
         return insightsDao.listTableNames();
     }
 
+    /** Returns the logged SQL statements, newest first. */
     public ArrayList<QueryLog.QueryEntry> recentQueries() {
         return insightsDao.recentQueries();
     }
 
+    /** Returns the query plan for a logged SELECT. */
     public ArrayList<HashMap<String, Object>> explain(QueryLog.QueryEntry entry)
             throws LfrlmsException {
         return insightsDao.explain(entry);
     }
 
+    /** Returns the CREATE TABLE statement for a listed table. */
     public String showCreateTable(String tableName) throws LfrlmsException {
         return insightsDao.showCreateTable(tableName);
     }
 
+    /** Lists the database views. */
     public ArrayList<HashMap<String, Object>> listViews() throws LfrlmsException {
         return insightsDao.listViews();
     }
 
+    /** Lists the stored functions. */
     public ArrayList<HashMap<String, Object>> listFunctions() throws LfrlmsException {
         return insightsDao.listRoutines("FUNCTION");
     }
 
+    /** Lists the stored procedures. */
     public ArrayList<HashMap<String, Object>> listProcedures() throws LfrlmsException {
         return insightsDao.listRoutines("PROCEDURE");
     }
 
+    /** Lists the triggers. */
     public ArrayList<HashMap<String, Object>> listTriggers() throws LfrlmsException {
         return insightsDao.listTriggers();
     }
 
+    /** Returns an example database object for each DBMS feature. */
     public ArrayList<FeatureExample> featureChecklist() {
         ArrayList<FeatureExample> features = new ArrayList<FeatureExample>();
         features.add(new FeatureExample("Constraints",
@@ -85,10 +96,12 @@ public class InsightsService {
             this.example = example;
         }
 
+        /** Returns the feature name. */
         public String getFeature() {
             return feature;
         }
 
+        /** Returns the example objects for the feature. */
         public String getExample() {
             return example;
         }

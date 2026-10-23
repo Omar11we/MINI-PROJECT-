@@ -22,6 +22,8 @@ import lfrlms.util.DateUtil;
 /**
  * Purpose: Shows customer identity, contract and payment history, and balance.
  * Concept: Polymorphic detail display and paged report data.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class CustomerDetailsDialog extends JDialog {
     private static final int PAGE_SIZE = 10;

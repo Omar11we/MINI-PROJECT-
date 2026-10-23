@@ -11,6 +11,8 @@ import lfrlms.util.QueryLog;
 /**
  * Purpose: Reads and writes corporate-only customer subtype columns.
  * Concept: JDBC joins, inheritance mapping and prepared statements.
+ * Layer: DAO (data access).
+ * Rubric: JDBC CRUD, overloading.
  */
 public class CorporateCustomerDao extends AbstractDao {
     private static final String SELECT_SQL = "SELECT c.customer_id, c.first_name, c.last_name, "
@@ -27,6 +29,7 @@ public class CorporateCustomerDao extends AbstractDao {
         super(queryLog);
     }
 
+    /** Inserts the corporate subtype row for an existing customer. */
     public boolean insert(CorporateCustomer customer) throws LfrlmsException {
         String sql = "INSERT INTO corporate_customer (customer_id, company_name, gst_no) "
                 + "VALUES (?, ?, ?)";
@@ -34,6 +37,7 @@ public class CorporateCustomerDao extends AbstractDao {
                 customer.getCompanyName(), customer.getGstNo()) > 0;
     }
 
+    /** Inserts the corporate subtype row on a caller-owned connection. */
     public boolean insert(java.sql.Connection connection, CorporateCustomer customer)
             throws LfrlmsException {
         String sql = "INSERT INTO corporate_customer (customer_id, company_name, gst_no) "
@@ -42,11 +46,13 @@ public class CorporateCustomerDao extends AbstractDao {
                 customer.getCompanyName(), customer.getGstNo()) > 0;
     }
 
+    /** Finds a corporate customer joined with its parent row, or returns null. */
     public CorporateCustomer findById(int customerId) throws LfrlmsException {
         return toCorporate(firstRow(queryRows(SELECT_SQL + "WHERE co.customer_id = ?",
                 Integer.valueOf(customerId))));
     }
 
+    /** Returns one sorted page of corporate customers. */
     public ArrayList<CorporateCustomer> findPage(String sortKey, boolean ascending,
             int pageNumber, int pageSize) throws LfrlmsException {
         QueryBuilder query = new QueryBuilder(SELECT_SQL + "WHERE 1 = 1");
@@ -61,10 +67,12 @@ public class CorporateCustomerDao extends AbstractDao {
         return customers;
     }
 
+    /** Counts corporate customer rows. */
     public long countAll() throws LfrlmsException {
         return queryCount("SELECT COUNT(*) AS row_count FROM corporate_customer");
     }
 
+    /** Updates the company name and GST number. */
     public boolean update(CorporateCustomer customer) throws LfrlmsException {
         String sql = "UPDATE corporate_customer SET company_name = ?, gst_no = ? "
                 + "WHERE customer_id = ?";
@@ -72,6 +80,7 @@ public class CorporateCustomerDao extends AbstractDao {
                 Integer.valueOf(customer.getCustomerId())) > 0;
     }
 
+    /** Updates the company name and GST number on a caller-owned connection. */
     public boolean update(java.sql.Connection connection, CorporateCustomer customer)
             throws LfrlmsException {
         String sql = "UPDATE corporate_customer SET company_name = ?, gst_no = ? "
@@ -80,11 +89,13 @@ public class CorporateCustomerDao extends AbstractDao {
                 Integer.valueOf(customer.getCustomerId())) > 0;
     }
 
+    /** Deletes the corporate subtype row for a customer. */
     public boolean delete(int customerId) throws LfrlmsException {
         return executeUpdate("DELETE FROM corporate_customer WHERE customer_id = ?",
                 Integer.valueOf(customerId)) > 0;
     }
 
+    /** Deletes the corporate subtype row on a caller-owned connection. */
     public boolean delete(java.sql.Connection connection, int customerId)
             throws LfrlmsException {
         return executeUpdate(connection,

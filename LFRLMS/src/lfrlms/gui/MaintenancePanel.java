@@ -35,6 +35,8 @@ import lfrlms.util.DateUtil;
 /**
  * Purpose: Shows service records and opens or completes vehicle maintenance.
  * Concept: Paged Swing tables, status rendering and background service calls.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class MaintenancePanel extends JPanel {
     private final MaintenanceService maintenanceService;

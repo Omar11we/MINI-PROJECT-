@@ -44,6 +44,8 @@ import lfrlms.util.Validator;
 /**
  * Purpose: Searches and manages fleet vehicles through service calls.
  * Concept: Swing listeners, server pagination and background threads.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class VehiclesPanel extends JPanel {
     private static final int DEFAULT_PAGE_SIZE = 10;

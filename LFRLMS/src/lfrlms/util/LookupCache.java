@@ -5,6 +5,8 @@ import java.util.HashMap;
 /**
  * Purpose: Caches display names for brand, category and branch identifiers.
  * Concept: HashMap lookup collections.
+ * Layer: Utility.
+ * Rubric: Collections, wrapper classes.
  */
 public class LookupCache {
     private final HashMap<Integer, String> brandNames;

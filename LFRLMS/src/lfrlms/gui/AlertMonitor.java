@@ -9,6 +9,8 @@ import lfrlms.util.AppLogger;
 /**
  * Purpose: Polls service-layer alerts without holding a connection while idle.
  * Concept: Runnable, volatile state, sleep and interrupt handling.
+ * Layer: GUI (presentation).
+ * Rubric: Thread, inner/anonymous classes.
  */
 public class AlertMonitor implements Runnable {
     public static final long POLL_INTERVAL_MILLIS = 60000L;
@@ -20,6 +22,7 @@ public class AlertMonitor implements Runnable {
 
     private final AlertService alertService;
     private final Listener listener;
+    // volatile so a stop request from the GUI thread is seen at once by this polling thread
     private volatile boolean running;
 
     public AlertMonitor(AlertService alertService, Listener listener) {

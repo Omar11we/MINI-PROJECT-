@@ -6,6 +6,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 
+// Layer: GUI (presentation).
+// Rubric: GUI, static/final.
 /** Shared visual settings for tables, panels and dialogs. */
 public final class Theme {
     public static final Color ACCENT_COLOR = new Color(49, 103, 158);

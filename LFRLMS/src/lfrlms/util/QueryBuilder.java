@@ -7,6 +7,8 @@ import java.util.Map;
 /**
  * Purpose: Builds paginated SQL from trusted fragments and bound values.
  * Concept: StringBuffer, collections and prepared-statement parameters.
+ * Layer: Utility.
+ * Rubric: StringBuffer.
  */
 public final class QueryBuilder {
     private final StringBuffer sql;

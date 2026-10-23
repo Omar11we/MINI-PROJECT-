@@ -8,6 +8,8 @@ import lfrlms.model.Driver;
 import lfrlms.util.Constants;
 import lfrlms.util.Validator;
 
+// Layer: Service (business logic).
+// Rubric: Exception handling.
 /** Validates active chauffeurs before assignments are handled by RentalService. */
 public class DriverService {
     private final DriverDao driverDao;
@@ -20,6 +22,7 @@ public class DriverService {
         this.driverDao = driverDao;
     }
 
+    /** Validates and inserts or updates a chauffeur, returning its id. */
     public int save(Driver driver) throws LfrlmsException {
         if (driver == null || !Validator.isValid(driver.getFirstName())
                 || !Validator.isValid(driver.getLastName())
@@ -38,6 +41,7 @@ public class DriverService {
         return driver.getDriverId();
     }
 
+    /** Marks a chauffeur inactive. */
     public void deactivate(int driverId) throws LfrlmsException {
         Driver driver = driverDao.findById(driverId);
         if (driver == null) {
@@ -47,15 +51,18 @@ public class DriverService {
         driverDao.update(driver);
     }
 
+    /** Deletes a chauffeur by id. */
     public boolean delete(int driverId) throws LfrlmsException {
         return driverDao.delete(driverId);
     }
 
+    /** Returns one sorted page of chauffeurs. */
     public ArrayList<Driver> listPage(String sortKey, boolean ascending,
             int pageNumber, int pageSize) throws LfrlmsException {
         return driverDao.findPage(sortKey, ascending, pageNumber, pageSize);
     }
 
+    /** Counts all chauffeurs. */
     public long countAll() throws LfrlmsException {
         return driverDao.countAll();
     }

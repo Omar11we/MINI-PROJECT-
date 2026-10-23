@@ -7,6 +7,8 @@ import lfrlms.util.Constants;
 /**
  * Purpose: Represents a payment linked to exactly one rental or lease.
  * Concept: Encapsulation and wrapper classes for nullable references.
+ * Layer: Model.
+ * Rubric: wrapper classes.
  */
 public class Payment {
     private int paymentId;

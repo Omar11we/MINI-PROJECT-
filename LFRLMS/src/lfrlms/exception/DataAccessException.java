@@ -5,6 +5,8 @@ import java.sql.SQLException;
 /**
  * Purpose: Wraps a database error while preserving its original cause.
  * Concept: Exception chaining.
+ * Layer: Exception.
+ * Rubric: Exception handling, overloading.
  */
 public class DataAccessException extends LfrlmsException {
     private static final long serialVersionUID = 1L;

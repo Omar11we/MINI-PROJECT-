@@ -8,11 +8,14 @@ import javax.swing.SwingUtilities;
 /**
  * Purpose: Refreshes the status-bar clock without touching Swing off the EDT.
  * Concept: Thread, volatile state, sleep and interrupt handling.
+ * Layer: GUI (presentation).
+ * Rubric: Thread, Inheritance.
  */
 public class ClockThread extends Thread {
     private static final DateTimeFormatter CLOCK_FORMAT =
             DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss");
     private final JLabel clockLabel;
+    // volatile so a stop request from the GUI thread is seen at once by this clock thread
     private volatile boolean running;
 
     public ClockThread(JLabel clockLabel) {

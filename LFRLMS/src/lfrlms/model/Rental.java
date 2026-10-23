@@ -9,6 +9,8 @@ import lfrlms.util.Constants;
 /**
  * Purpose: Represents a reservation or rental lifecycle for one vehicle.
  * Concept: Inheritance, super constructors, polymorphism and BigDecimal.
+ * Layer: Model.
+ * Rubric: Inheritance, wrapper classes.
  */
 public class Rental extends Contract {
     private Integer driverId;

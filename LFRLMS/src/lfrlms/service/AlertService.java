@@ -16,6 +16,8 @@ import lfrlms.model.Maintenance;
 import lfrlms.model.Rental;
 import lfrlms.util.Constants;
 
+// Layer: Service (business logic).
+// Rubric: Collections.
 /** Purpose: Collects alert counts and list entries from the existing DAOs. */
 public class AlertService {
     private static final int PAGE_SIZE = 100;
@@ -36,10 +38,12 @@ public class AlertService {
         this.customerDao = customerDao;
     }
 
+    /** Returns only the counts from a fresh alert snapshot. */
     public HashMap<String, Integer> getAlertCounts() throws LfrlmsException {
         return getAlertSnapshot().getCounts();
     }
 
+    /** Collects every alert count and message in one pass. */
     public AlertSnapshot getAlertSnapshot() throws LfrlmsException {
         LocalDateTime now = LocalDateTime.now();
         LocalDate today = LocalDate.now();

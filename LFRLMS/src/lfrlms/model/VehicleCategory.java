@@ -3,6 +3,8 @@ package lfrlms.model;
 /**
  * Purpose: Represents a category used to filter and describe vehicles.
  * Concept: Encapsulation and copy construction.
+ * Layer: Model.
+ * Rubric: constructors, overloading.
  */
 public class VehicleCategory {
     private int categoryId;

@@ -12,6 +12,8 @@ import lfrlms.util.QueryLog;
 /**
  * Purpose: Reads and writes maintenance rows without managing vehicle status.
  * Concept: JDBC CRUD, nullable dates and server-side pagination.
+ * Layer: DAO (data access).
+ * Rubric: JDBC CRUD, overloading.
  */
 public class MaintenanceDao extends AbstractDao {
     private static final String MAINTENANCE_COLUMNS = "m.maintenance_id, m.vehicle_id, "
@@ -29,6 +31,7 @@ public class MaintenanceDao extends AbstractDao {
         super(queryLog);
     }
 
+    /** Inserts a maintenance record and returns its generated id. */
     public int insert(Maintenance maintenance) throws LfrlmsException {
         String sql = "INSERT INTO maintenance (vehicle_id, service_date, service_type, "
                 + "description, cost, next_service_date, completed_date, status) "
@@ -40,6 +43,7 @@ public class MaintenanceDao extends AbstractDao {
                 maintenance.getStatus());
     }
 
+    /** Inserts a maintenance record on a caller-owned connection and returns its generated id. */
     public int insert(java.sql.Connection connection, Maintenance maintenance)
             throws LfrlmsException {
         String sql = "INSERT INTO maintenance (vehicle_id, service_date, service_type, "
@@ -52,17 +56,20 @@ public class MaintenanceDao extends AbstractDao {
                 maintenance.getStatus());
     }
 
+    /** Finds a maintenance record by id, or returns null. */
     public Maintenance findById(int maintenanceId) throws LfrlmsException {
         String sql = "SELECT " + MAINTENANCE_COLUMNS + "FROM maintenance m "
                 + "WHERE m.maintenance_id = ?";
         return toMaintenance(firstRow(queryRows(sql, Integer.valueOf(maintenanceId))));
     }
 
+    /** Returns one sorted page of maintenance records with no filters. */
     public ArrayList<Maintenance> findPage(String sortKey, boolean ascending,
             int pageNumber, int pageSize) throws LfrlmsException {
         return search(null, null, null, null, sortKey, ascending, pageNumber, pageSize);
     }
 
+    /** Searches maintenance records by text, status and service-date range. */
     public ArrayList<Maintenance> search(String text, String status,
             LocalDate serviceFrom, LocalDate serviceTo, String sortKey,
             boolean ascending, int pageNumber, int pageSize) throws LfrlmsException {
@@ -80,6 +87,7 @@ public class MaintenanceDao extends AbstractDao {
         return records;
     }
 
+    /** Counts maintenance records that match the search filters. */
     public long countSearchResults(String text, String status,
             LocalDate serviceFrom, LocalDate serviceTo) throws LfrlmsException {
         QueryBuilder query = new QueryBuilder("SELECT COUNT(*) AS row_count "
@@ -88,10 +96,12 @@ public class MaintenanceDao extends AbstractDao {
         return queryCount(query.getSql(), query.getParameters().toArray());
     }
 
+    /** Counts all maintenance records. */
     public long countAll() throws LfrlmsException {
         return queryCount("SELECT COUNT(*) AS row_count FROM maintenance");
     }
 
+    /** Updates a maintenance record; returns true if a row was updated. */
     public boolean update(Maintenance maintenance) throws LfrlmsException {
         String sql = "UPDATE maintenance SET vehicle_id = ?, service_date = ?, "
                 + "service_type = ?, description = ?, cost = ?, next_service_date = ?, "
@@ -103,6 +113,7 @@ public class MaintenanceDao extends AbstractDao {
                 maintenance.getStatus(), Integer.valueOf(maintenance.getMaintenanceId())) > 0;
     }
 
+    /** Updates a maintenance record on a caller-owned connection. */
     public boolean update(java.sql.Connection connection, Maintenance maintenance)
             throws LfrlmsException {
         String sql = "UPDATE maintenance SET vehicle_id = ?, service_date = ?, "
@@ -115,11 +126,13 @@ public class MaintenanceDao extends AbstractDao {
                 maintenance.getStatus(), Integer.valueOf(maintenance.getMaintenanceId())) > 0;
     }
 
+    /** Deletes a maintenance record by id; returns true if a row was removed. */
     public boolean delete(int maintenanceId) throws LfrlmsException {
         return executeUpdate("DELETE FROM maintenance WHERE maintenance_id = ?",
                 Integer.valueOf(maintenanceId)) > 0;
     }
 
+    /** Deletes a maintenance record on a caller-owned connection. */
     public boolean delete(java.sql.Connection connection, int maintenanceId)
             throws LfrlmsException {
         return executeUpdate(connection,

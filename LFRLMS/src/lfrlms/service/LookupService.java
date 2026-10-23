@@ -12,6 +12,8 @@ import lfrlms.model.VehicleCategory;
 import lfrlms.util.LookupCache;
 import lfrlms.util.Validator;
 
+// Layer: Service (business logic).
+// Rubric: Collections.
 /** Loads small lookup tables into the display-name cache. */
 public class LookupService {
     private static final int PAGE_SIZE = 100;
@@ -30,6 +32,7 @@ public class LookupService {
         this.branchDao = branchDao;
     }
 
+    /** Reloads every brand, category and branch name into a new cache. */
     public LookupCache refresh() throws LfrlmsException {
         LookupCache cache = new LookupCache();
         int pageNumber = 1;
@@ -70,18 +73,22 @@ public class LookupService {
         }
     }
 
+    /** Returns up to 100 brands sorted by name. */
     public ArrayList<Brand> listBrands() throws LfrlmsException {
         return brandDao.findPage("brandName", true, 1, PAGE_SIZE);
     }
 
+    /** Returns up to 100 vehicle categories sorted by name. */
     public ArrayList<VehicleCategory> listCategories() throws LfrlmsException {
         return categoryDao.findPage("categoryName", true, 1, PAGE_SIZE);
     }
 
+    /** Returns up to 100 branches sorted by name. */
     public ArrayList<Branch> listBranches() throws LfrlmsException {
         return branchDao.findPage("branchName", true, 1, PAGE_SIZE);
     }
 
+    /** Validates and inserts or updates a brand, returning its id. */
     public int saveBrand(Brand brand) throws LfrlmsException {
         if (brand == null || !Validator.isValid(brand.getBrandName())) {
             throw new ValidationException("Enter a brand name.");
@@ -95,6 +102,7 @@ public class LookupService {
         return brand.getBrandId();
     }
 
+    /** Validates and inserts or updates a vehicle category, returning its id. */
     public int saveCategory(VehicleCategory category) throws LfrlmsException {
         if (category == null || !Validator.isValid(category.getCategoryName())) {
             throw new ValidationException("Enter a vehicle category name.");
@@ -108,6 +116,7 @@ public class LookupService {
         return category.getCategoryId();
     }
 
+    /** Validates and inserts or updates a branch, returning its id. */
     public int saveBranch(Branch branch) throws LfrlmsException {
         if (branch == null || !Validator.isValid(branch.getBranchName())
                 || !Validator.isValid(branch.getStreet()) || !Validator.isValid(branch.getCity())
@@ -124,14 +133,17 @@ public class LookupService {
         return branch.getBranchId();
     }
 
+    /** Deletes a brand by id. */
     public boolean deleteBrand(int brandId) throws LfrlmsException {
         return brandDao.delete(brandId);
     }
 
+    /** Deletes a vehicle category by id. */
     public boolean deleteCategory(int categoryId) throws LfrlmsException {
         return categoryDao.delete(categoryId);
     }
 
+    /** Deletes a branch by id. */
     public boolean deleteBranch(int branchId) throws LfrlmsException {
         return branchDao.delete(branchId);
     }

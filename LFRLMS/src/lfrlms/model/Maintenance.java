@@ -8,6 +8,8 @@ import lfrlms.util.Constants;
 /**
  * Purpose: Represents vehicle service work and its completion details.
  * Concept: Encapsulation and nullable date fields.
+ * Layer: Model.
+ * Rubric: constructors, overloading.
  */
 public class Maintenance {
     private int maintenanceId;

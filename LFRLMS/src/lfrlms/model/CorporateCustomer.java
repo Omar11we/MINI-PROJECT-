@@ -5,6 +5,8 @@ import lfrlms.util.Constants;
 /**
  * Purpose: Adds company identity while keeping licence fields off corporate records.
  * Concept: Inheritance, super constructors and encapsulation.
+ * Layer: Model.
+ * Rubric: Inheritance, constructors.
  */
 public class CorporateCustomer extends Customer {
     private String companyName;

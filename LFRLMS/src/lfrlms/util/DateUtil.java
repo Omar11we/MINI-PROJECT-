@@ -7,6 +7,8 @@ import java.time.format.DateTimeFormatter;
 /**
  * Purpose: Parses and formats the application's java.time date values.
  * Concept: Static utility methods and immutable date types.
+ * Layer: Utility.
+ * Rubric: static/final.
  */
 public final class DateUtil {
     private static final DateTimeFormatter DATE_FORMAT =

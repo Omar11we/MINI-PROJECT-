@@ -13,11 +13,15 @@ import java.util.Properties;
 /**
  * Purpose: Loads local database settings and opens a new connection per call.
  * Concept: Static methods, Properties and JDBC resource ownership.
+ * Layer: Utility.
+ * Rubric: static/final, Exception handling.
  */
 public final class DBConnection {
     private DBConnection() {
     }
 
+    // Static factory: every call returns a new connection that the caller must close,
+    // so no connection is ever shared between threads
     public static Connection getConnection() throws SQLException, IOException {
         Properties properties = loadProperties();
         String url = properties.getProperty(Constants.DB_URL_KEY, "").trim();

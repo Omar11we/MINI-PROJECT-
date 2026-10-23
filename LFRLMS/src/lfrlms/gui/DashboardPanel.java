@@ -34,6 +34,8 @@ import java.util.TreeMap;
 /**
  * Purpose: Displays live fleet totals, revenue and alert details.
  * Concept: Swing layout managers and BackgroundTask for database work.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class DashboardPanel extends JPanel {
     private final DashboardService dashboardService;

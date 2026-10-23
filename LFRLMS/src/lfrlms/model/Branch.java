@@ -3,6 +3,8 @@ package lfrlms.model;
 /**
  * Purpose: Represents a fleet location.
  * Concept: Encapsulation and copy construction.
+ * Layer: Model.
+ * Rubric: constructors, overloading.
  */
 public class Branch {
     private int branchId;

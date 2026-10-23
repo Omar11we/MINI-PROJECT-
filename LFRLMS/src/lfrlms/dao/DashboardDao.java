@@ -8,6 +8,8 @@ import lfrlms.util.QueryLog;
 /**
  * Purpose: Reads database counts and current-month revenue for the dashboard.
  * Concept: JDBC aggregate queries and collections.
+ * Layer: DAO (data access).
+ * Rubric: JDBC CRUD, Collections.
  */
 public class DashboardDao extends AbstractDao {
     public DashboardDao() {
@@ -18,6 +20,7 @@ public class DashboardDao extends AbstractDao {
         super(queryLog);
     }
 
+    /** Reads fleet counts, active contracts and this month's revenue in one query. */
     public HashMap<String, Object> getSummary() throws LfrlmsException {
         String sql = "SELECT "
                 + "(SELECT COUNT(*) FROM vehicle) AS total_vehicles, "

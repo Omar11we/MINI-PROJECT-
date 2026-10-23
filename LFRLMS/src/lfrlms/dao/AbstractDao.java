@@ -27,6 +27,8 @@ import lfrlms.util.QueryLog;
 /**
  * Purpose: Shares JDBC resource handling and error translation across DAOs.
  * Concept: Inheritance, try-with-resources and exception chaining.
+ * Layer: DAO (data access).
+ * Rubric: interfaces/abstract classes, Exception handling.
  */
 public abstract class AbstractDao {
     protected final QueryLog queryLog;
@@ -39,18 +41,25 @@ public abstract class AbstractDao {
         this.queryLog = queryLog == null ? QueryLog.getShared() : queryLog;
     }
 
+    /** Runs a SELECT on its own connection and returns each row as a column map. */
     protected ArrayList<HashMap<String, Object>> queryRows(String sql,
             Object... parameters) throws LfrlmsException {
+        // Start timing for the query log
         long started = System.nanoTime();
+        // Open a connection and prepare the SQL; try-with-resources closes both
         try (Connection connection = openConnection();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
+            // Bind the values to the ? placeholders
             bindParameters(statement, parameters, 1);
+            // Run the query and copy each row into a map
             try (ResultSet resultSet = statement.executeQuery()) {
                 ArrayList<HashMap<String, Object>> rows = readRows(resultSet);
+                // Log the SQL with its timing and row count
                 recordQuery(sql, parameters, started, rows.size());
                 return rows;
             }
         } catch (SQLException exception) {
+            // Log the failure, then turn the SQLException into an application exception
             recordQuery(sql, parameters, started, -1);
             throw translate(exception, "read database records");
         }
@@ -59,20 +68,27 @@ public abstract class AbstractDao {
     /** Executes a query on a caller-owned connection without closing that connection. */
     protected ArrayList<HashMap<String, Object>> queryRows(Connection connection,
             String sql, Object... parameters) throws LfrlmsException {
+        // Start timing for the query log
         long started = System.nanoTime();
+        // Prepare the SQL; only the statement is closed here, not the caller's connection
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            // Bind the values to the ? placeholders
             bindParameters(statement, parameters, 1);
+            // Run the query and copy each row into a map
             try (ResultSet resultSet = statement.executeQuery()) {
                 ArrayList<HashMap<String, Object>> rows = readRows(resultSet);
+                // Log the SQL with its timing and row count
                 recordQuery(sql, parameters, started, rows.size());
                 return rows;
             }
         } catch (SQLException exception) {
+            // Log the failure, then turn the SQLException into an application exception
             recordQuery(sql, parameters, started, -1);
             throw translate(exception, "read database records");
         }
     }
 
+    /** Calls a stored procedure and returns the rows of its result set. */
     protected ArrayList<HashMap<String, Object>> callRows(String sql,
             Object... parameters) throws LfrlmsException {
         long started = System.nanoTime();
@@ -97,6 +113,7 @@ public abstract class AbstractDao {
         }
     }
 
+    /** Calls a stored function and returns its value. */
     protected Object callScalarFunction(String sql, int returnType,
             Object... parameters) throws LfrlmsException {
         long started = System.nanoTime();
@@ -114,6 +131,7 @@ public abstract class AbstractDao {
         }
     }
 
+    /** Runs an UPDATE or DELETE on its own connection and returns the affected row count. */
     protected int executeUpdate(String sql, Object... parameters)
             throws LfrlmsException {
         long started = System.nanoTime();
@@ -144,6 +162,7 @@ public abstract class AbstractDao {
         }
     }
 
+    /** Runs an INSERT on its own connection and returns the generated key. */
     protected int executeInsert(String sql, Object... parameters)
             throws LfrlmsException {
         long started = System.nanoTime();
@@ -188,6 +207,7 @@ public abstract class AbstractDao {
         }
     }
 
+    /** Runs a COUNT query and returns its first column. */
     protected long queryCount(String sql, Object... parameters)
             throws LfrlmsException {
         ArrayList<HashMap<String, Object>> rows = queryRows(sql, parameters);
@@ -198,6 +218,7 @@ public abstract class AbstractDao {
         return value instanceof Number ? ((Number) value).longValue() : 0L;
     }
 
+    /** Runs a COUNT query on a caller-owned connection and returns its first column. */
     protected long queryCount(Connection connection, String sql, Object... parameters)
             throws LfrlmsException {
         ArrayList<HashMap<String, Object>> rows = queryRows(connection, sql, parameters);
@@ -208,6 +229,7 @@ public abstract class AbstractDao {
         return value instanceof Number ? ((Number) value).longValue() : 0L;
     }
 
+    /** Opens a new connection and translates setup failures. */
     protected Connection openConnection() throws LfrlmsException {
         try {
             return DBConnection.getConnection();
@@ -220,6 +242,7 @@ public abstract class AbstractDao {
         }
     }
 
+    /** Binds each value to its placeholder, converting java.time values to SQL types. */
     protected void bindParameters(PreparedStatement statement, Object[] parameters,
             int firstIndex) throws SQLException {
         for (int offset = 0; offset < parameters.length; offset++) {
@@ -237,25 +260,30 @@ public abstract class AbstractDao {
         }
     }
 
+    /** Returns the first row, or null if there are none. */
     protected HashMap<String, Object> firstRow(ArrayList<HashMap<String, Object>> rows) {
         return rows.isEmpty() ? null : rows.get(0);
     }
 
+    /** Reads a numeric column as an int, or zero if it is null. */
     protected int intValue(Map<String, Object> row, String column) {
         Object value = row.get(column);
         return value instanceof Number ? ((Number) value).intValue() : 0;
     }
 
+    /** Reads a numeric column as an Integer, or null. */
     protected Integer nullableIntValue(Map<String, Object> row, String column) {
         Object value = row.get(column);
         return value instanceof Number ? Integer.valueOf(((Number) value).intValue()) : null;
     }
 
+    /** Reads a column as text, or null. */
     protected String stringValue(Map<String, Object> row, String column) {
         Object value = row.get(column);
         return value == null ? null : value.toString();
     }
 
+    /** Reads a numeric column as a BigDecimal, or null. */
     protected BigDecimal decimalValue(Map<String, Object> row, String column) {
         Object value = row.get(column);
         if (value instanceof BigDecimal) {
@@ -265,6 +293,7 @@ public abstract class AbstractDao {
                 ? new BigDecimal(value.toString()) : null;
     }
 
+    /** Reads a DATE column as a LocalDate, or null. */
     protected LocalDate dateValue(Map<String, Object> row, String column) {
         Object value = row.get(column);
         if (value instanceof LocalDate) {
@@ -273,6 +302,7 @@ public abstract class AbstractDao {
         return value instanceof Date ? ((Date) value).toLocalDate() : null;
     }
 
+    /** Reads a DATETIME column as a LocalDateTime, or null. */
     protected LocalDateTime dateTimeValue(Map<String, Object> row, String column) {
         Object value = row.get(column);
         if (value instanceof LocalDateTime) {
@@ -303,15 +333,18 @@ public abstract class AbstractDao {
     }
 
     private LfrlmsException translate(SQLException exception, String action) {
+        // MySQL error 1451: another table still references this row
         if (exception.getErrorCode() == 1451) {
             return new RecordInUseException("Deactivate it instead", exception);
         }
+        // MySQL error 1062: duplicate unique key; use a friendly message for known keys
         if (exception.getErrorCode() == 1062 && "23000".equals(exception.getSQLState())) {
             String duplicateMessage = duplicateMessage(exception);
             if (duplicateMessage != null) {
                 return new DuplicateRecordException(duplicateMessage, exception);
             }
         }
+        // Anything else becomes a general data access error
         return new DataAccessException("Could not " + action + ".", exception);
     }
 

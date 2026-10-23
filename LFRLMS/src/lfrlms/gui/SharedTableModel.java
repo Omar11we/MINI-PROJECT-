@@ -15,6 +15,8 @@ import javax.swing.table.JTableHeader;
 /**
  * Purpose: Supplies non-editable, replaceable rows to module tables.
  * Concept: Vector collections and Swing table models.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, Collections.
  */
 public class SharedTableModel extends DefaultTableModel {
     private static final DateTimeFormatter DATE_TIME_FORMAT =

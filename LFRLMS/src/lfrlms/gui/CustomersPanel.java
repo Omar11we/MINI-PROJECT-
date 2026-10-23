@@ -35,6 +35,8 @@ import lfrlms.util.DateUtil;
 /**
  * Purpose: Searches and manages individual and corporate customer records.
  * Concept: Polymorphic models, paged tables and background service calls.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class CustomersPanel extends JPanel {
     private static final int DEFAULT_PAGE_SIZE = 10;

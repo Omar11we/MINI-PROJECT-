@@ -13,6 +13,8 @@ import lfrlms.util.AppLogger;
 /**
  * Purpose: Writes the visible page of a read-only table as escaped CSV.
  * Concept: BufferedWriter, exception handling and reusable GUI support.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, Exception handling.
  */
 public final class CsvExport {
     private CsvExport() {

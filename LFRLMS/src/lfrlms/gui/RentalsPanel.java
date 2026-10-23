@@ -39,6 +39,8 @@ import lfrlms.util.DateUtil;
 /**
  * Purpose: Filters rentals and runs reservation, pickup, cancellation and return actions.
  * Concept: Paged Swing tables, listeners and background service calls.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class RentalsPanel extends JPanel {
     private final RentalService rentalService;

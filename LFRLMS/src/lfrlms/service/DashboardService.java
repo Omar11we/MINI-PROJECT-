@@ -4,6 +4,8 @@ import java.util.HashMap;
 import lfrlms.dao.DashboardDao;
 import lfrlms.exception.LfrlmsException;
 
+// Layer: Service (business logic).
+// Rubric: Collections.
 /** Combines database dashboard totals with the periodic alert counts. */
 public class DashboardService {
     private final DashboardDao dashboardDao;
@@ -18,6 +20,7 @@ public class DashboardService {
         this.alertService = alertService;
     }
 
+    /** Returns dashboard totals merged with the current alert counts. */
     public HashMap<String, Object> getSummary() throws LfrlmsException {
         HashMap<String, Object> summary = dashboardDao.getSummary();
         if (summary == null) {
@@ -28,6 +31,7 @@ public class DashboardService {
         return summary;
     }
 
+    /** Returns dashboard totals without alert counts. */
     public HashMap<String, Object> getDashboardSummary() throws LfrlmsException {
         return dashboardDao.getSummary();
     }

@@ -20,6 +20,8 @@ import lfrlms.model.Vehicle;
 import lfrlms.util.Constants;
 import lfrlms.util.Validator;
 
+// Layer: Service (business logic).
+// Rubric: JDBC CRUD, Exception handling.
 /** Coordinates lease reservations, starts and terminal transitions. */
 public class LeaseService extends AbstractService {
     private final LeaseDao leaseDao;
@@ -39,32 +41,42 @@ public class LeaseService extends AbstractService {
         this.availabilityService = availabilityService;
     }
 
+    /** Creates a scheduled lease after locking the vehicle and checking availability. */
     public int createLease(Lease lease) throws LfrlmsException {
+        // Validate input
         if (lease == null || lease.getCustomerId() <= 0 || lease.getVehicleId() <= 0
                 || !Validator.isValid(lease.getStartDate(), lease.getEndDate())
                 || (lease.getDeposit() != null && !Validator.isNonNegative(lease.getDeposit()))
                 || !Constants.LEASE_SCHEDULED.equals(lease.getStatus())) {
             throw new ValidationException("Enter a valid scheduled lease period.");
         }
+        // Open a connection and start a transaction
         try (Connection connection = openConnection()) {
             beginTransaction(connection);
             try {
+                // Lock the vehicle row (SELECT ... FOR UPDATE) so two bookings
+                // cannot both pass the availability check
                 Vehicle vehicle = vehicleDao.lockByIdForUpdate(connection, lease.getVehicleId());
+                // The vehicle must exist, have a lease rate and be in service
                 if (vehicle == null || vehicle.getLeaseRate() == null
                         || Constants.VEHICLE_MAINTENANCE.equals(vehicle.getStatus())
                         || Constants.VEHICLE_INACTIVE.equals(vehicle.getStatus())) {
                     throw new VehicleNotAvailableException("The selected vehicle cannot be leased.");
                 }
+                // Check customer eligibility
                 validateCustomer(lease);
+                // Recheck availability for whole days, from the start date through the end date
                 if (!availabilityService.isVehicleAvailable(lease.getVehicleId(),
                         lease.getStartDate().atStartOfDay(),
                         lease.getEndDate().plusDays(1).atStartOfDay(), null, null)) {
                     throw new VehicleNotAvailableException(
                             "The vehicle is not available for the full lease period.");
                 }
+                // Fix the current lease rate on the lease and insert it
                 lease.setMonthlyCharge(vehicle.getLeaseRate());
                 int leaseId = leaseDao.insert(connection, lease);
                 lease.setLeaseId(leaseId);
+                // Commit; the catch blocks below roll back on any failure
                 commit(connection);
                 return leaseId;
             } catch (LfrlmsException exception) {
@@ -79,6 +91,7 @@ public class LeaseService extends AbstractService {
         }
     }
 
+    /** Builds a scheduled lease from form values and creates it. */
     public int scheduleLease(int customerId, int vehicleId, LocalDate startDate,
             LocalDate endDate, BigDecimal deposit) throws LfrlmsException {
         if (deposit == null || !Validator.isNonNegative(deposit)) {
@@ -94,25 +107,35 @@ public class LeaseService extends AbstractService {
         return createLease(lease);
     }
 
+    /** Starts a scheduled lease and marks its vehicle Leased in one transaction. */
     public void startLease(int leaseId) throws LfrlmsException {
+        // Read the lease once to find which vehicle to lock
         Lease initial = leaseDao.findById(leaseId);
         if (initial == null) {
             throw new ValidationException("The lease record no longer exists.");
         }
+        // Open a connection and start a transaction
         try (Connection connection = openConnection()) {
             beginTransaction(connection);
             try {
+                // Lock the vehicle row (SELECT ... FOR UPDATE) so no other
+                // booking can change it until we commit
                 Vehicle vehicle = vehicleDao.lockByIdForUpdate(connection, initial.getVehicleId());
+                // Read the lease again now that the vehicle is locked, in case it changed
                 Lease lease = leaseDao.findById(leaseId);
+                // Recheck that the lease is still Scheduled
                 if (vehicle == null || lease == null
                         || !Constants.LEASE_SCHEDULED.equals(lease.getStatus())) {
                     throw new ValidationException("Only a scheduled lease can be started.");
                 }
+                // Check customer eligibility
                 validateCustomer(lease);
+                // Start the check at now or at the scheduled start, whichever is earlier
                 LocalDateTime now = LocalDateTime.now();
                 LocalDateTime scheduledStart = lease.getStartDate().atStartOfDay();
                 LocalDateTime availabilityFrom = now.isBefore(scheduledStart)
                         ? now : scheduledStart;
+                // Recheck availability, ignoring this lease's own booking
                 if (!availabilityService.isVehicleAvailable(lease.getVehicleId(),
                         availabilityFrom,
                         lease.getEndDate().plusDays(1).atStartOfDay(), null,
@@ -120,11 +143,13 @@ public class LeaseService extends AbstractService {
                     throw new VehicleNotAvailableException(
                             "The vehicle has another commitment during this lease.");
                 }
+                // Mark the lease Active and the vehicle Leased
                 lease.setStatus(Constants.LEASE_ACTIVE);
                 vehicle.setStatus(Constants.VEHICLE_LEASED);
                 if (!leaseDao.update(connection, lease) || !vehicleDao.update(connection, vehicle)) {
                     throw new ValidationException("The lease could not be started.");
                 }
+                // Commit; the catch blocks below roll back on any failure
                 commit(connection);
             } catch (LfrlmsException exception) {
                 rollback(connection, exception);
@@ -138,33 +163,43 @@ public class LeaseService extends AbstractService {
         }
     }
 
+    /** Completes or terminates a lease, freeing the vehicle if the lease had started. */
     public void finishLease(int leaseId, String finalStatus) throws LfrlmsException {
+        // Validate input
         if (!Constants.LEASE_COMPLETED.equals(finalStatus)
                 && !Constants.LEASE_TERMINATED.equals(finalStatus)) {
             throw new ValidationException("Choose Completed or Terminated as the final status.");
         }
+        // Only an Active or Scheduled lease can be ended
         Lease initial = leaseDao.findById(leaseId);
         if (initial == null || (!Constants.LEASE_ACTIVE.equals(initial.getStatus())
                 && !Constants.LEASE_SCHEDULED.equals(initial.getStatus()))) {
             throw new ValidationException("Only an active or scheduled lease can be ended.");
         }
+        // Open a connection and start a transaction
         try (Connection connection = openConnection()) {
             beginTransaction(connection);
             try {
+                // Lock the vehicle row (SELECT ... FOR UPDATE) so no other
+                // booking can change it until we commit
                 Vehicle vehicle = vehicleDao.lockByIdForUpdate(connection, initial.getVehicleId());
+                // Read the lease again now that the vehicle is locked
                 Lease lease = leaseDao.findById(leaseId);
                 if (lease == null) {
                     throw new ValidationException("The lease record no longer exists.");
                 }
+                // Remember whether the lease had started, then save the final status
                 boolean wasActive = Constants.LEASE_ACTIVE.equals(lease.getStatus());
                 lease.setStatus(finalStatus);
                 if (!leaseDao.update(connection, lease)) {
                     throw new ValidationException("The lease could not be updated.");
                 }
+                // Free the vehicle only if the lease had started
                 if (wasActive && vehicle != null) {
                     vehicle.setStatus(Constants.VEHICLE_AVAILABLE);
                     vehicleDao.update(connection, vehicle);
                 }
+                // Commit; the catch blocks below roll back on any failure
                 commit(connection);
             } catch (LfrlmsException exception) {
                 rollback(connection, exception);
@@ -178,10 +213,12 @@ public class LeaseService extends AbstractService {
         }
     }
 
+    /** Finds a lease by id, or returns null. */
     public Lease findById(int leaseId) throws LfrlmsException {
         return leaseDao.findById(leaseId);
     }
 
+    /** Searches leases one page at a time. */
     public ArrayList<Lease> search(String text, String status,
             LocalDate from, LocalDate to, boolean outstandingOnly,
             String sortKey, boolean ascending, int pageNumber, int pageSize)
@@ -190,6 +227,7 @@ public class LeaseService extends AbstractService {
                 sortKey, ascending, pageNumber, pageSize);
     }
 
+    /** Counts leases that match the search filters. */
     public long countSearchResults(String text, String status, LocalDate from,
             LocalDate to, boolean outstandingOnly) throws LfrlmsException {
         return leaseDao.countSearchResults(text, status, from, to, outstandingOnly);

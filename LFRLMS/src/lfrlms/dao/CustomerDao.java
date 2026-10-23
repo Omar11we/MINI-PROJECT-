@@ -14,6 +14,8 @@ import lfrlms.util.QueryLog;
 /**
  * Purpose: Reads parent customer rows with their optional subtype data.
  * Concept: JDBC joins, polymorphism and server-side pagination.
+ * Layer: DAO (data access).
+ * Rubric: JDBC CRUD, overloading.
  */
 public class CustomerDao extends AbstractDao {
     private static final String CUSTOMER_SELECT = "SELECT c.customer_id, c.customer_type, "
@@ -34,6 +36,7 @@ public class CustomerDao extends AbstractDao {
         super(queryLog);
     }
 
+    /** Inserts a parent customer row and returns its generated id. */
     public int insert(Customer customer) throws LfrlmsException {
         String sql = "INSERT INTO customer (customer_type, first_name, last_name, email, "
                 + "phone, street, city, pincode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -42,6 +45,7 @@ public class CustomerDao extends AbstractDao {
                 customer.getStreet(), customer.getCity(), customer.getPincode());
     }
 
+    /** Inserts a parent customer row on a caller-owned connection. */
     public int insert(java.sql.Connection connection, Customer customer)
             throws LfrlmsException {
         String sql = "INSERT INTO customer (customer_type, first_name, last_name, email, "
@@ -52,16 +56,19 @@ public class CustomerDao extends AbstractDao {
                 customer.getPincode());
     }
 
+    /** Finds a customer and builds the matching subclass, or returns null. */
     public Customer findById(int customerId) throws LfrlmsException {
         String sql = CUSTOMER_SELECT + "WHERE c.customer_id = ?";
         return toCustomer(firstRow(queryRows(sql, Integer.valueOf(customerId))));
     }
 
+    /** Returns one sorted page of customers with no filters. */
     public ArrayList<Customer> findPage(String sortKey, boolean ascending,
             int pageNumber, int pageSize) throws LfrlmsException {
         return search(null, null, null, sortKey, ascending, pageNumber, pageSize);
     }
 
+    /** Searches customers by text, type and licence expiry, one page at a time. */
     public ArrayList<Customer> search(String text, String customerType,
             Integer licenseExpiryWithinDays, String sortKey, boolean ascending,
             int pageNumber, int pageSize) throws LfrlmsException {
@@ -78,6 +85,7 @@ public class CustomerDao extends AbstractDao {
         return customers;
     }
 
+    /** Counts customers that match the search filters. */
     public long countSearchResults(String text, String customerType,
             Integer licenseExpiryWithinDays) throws LfrlmsException {
         String fromClause = "FROM customer c "
@@ -89,10 +97,12 @@ public class CustomerDao extends AbstractDao {
         return queryCount(query.getSql(), query.getParameters().toArray());
     }
 
+    /** Counts all customers. */
     public long countAll() throws LfrlmsException {
         return queryCount("SELECT COUNT(*) AS row_count FROM customer");
     }
 
+    /** Checks whether the customer has any rental or lease. */
     public boolean hasTransactionHistory(int customerId) throws LfrlmsException {
         String sql = "SELECT COUNT(*) AS transaction_count FROM ("
                 + "SELECT rental_id FROM rental WHERE customer_id = ? "
@@ -112,6 +122,7 @@ public class CustomerDao extends AbstractDao {
                 Integer.valueOf(customerId)) > 0;
     }
 
+    /** Updates the parent customer row. */
     public boolean update(Customer customer) throws LfrlmsException {
         String sql = "UPDATE customer SET customer_type = ?, first_name = ?, last_name = ?, "
                 + "email = ?, phone = ?, street = ?, city = ?, pincode = ? "
@@ -122,6 +133,7 @@ public class CustomerDao extends AbstractDao {
                 Integer.valueOf(customer.getCustomerId())) > 0;
     }
 
+    /** Updates the parent customer row on a caller-owned connection. */
     public boolean update(java.sql.Connection connection, Customer customer)
             throws LfrlmsException {
         String sql = "UPDATE customer SET customer_type = ?, first_name = ?, last_name = ?, "
@@ -133,11 +145,13 @@ public class CustomerDao extends AbstractDao {
                 customer.getPincode(), Integer.valueOf(customer.getCustomerId())) > 0;
     }
 
+    /** Deletes the parent customer row. */
     public boolean delete(int customerId) throws LfrlmsException {
         return executeUpdate("DELETE FROM customer WHERE customer_id = ?",
                 Integer.valueOf(customerId)) > 0;
     }
 
+    /** Deletes the parent customer row on a caller-owned connection. */
     public boolean delete(java.sql.Connection connection, int customerId)
             throws LfrlmsException {
         return executeUpdate(connection, "DELETE FROM customer WHERE customer_id = ?",

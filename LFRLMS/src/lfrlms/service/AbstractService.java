@@ -7,8 +7,11 @@ import lfrlms.exception.DataAccessException;
 import lfrlms.exception.LfrlmsException;
 import lfrlms.util.DBConnection;
 
+// Layer: Service (business logic).
+// Rubric: interfaces/abstract classes, Exception handling.
 /** Shared transaction helpers for services; services own and close their connections. */
 abstract class AbstractService {
+    /** Opens a connection that the calling service must close. */
     protected Connection openConnection() throws LfrlmsException {
         try {
             return DBConnection.getConnection();
@@ -21,6 +24,7 @@ abstract class AbstractService {
         }
     }
 
+    /** Turns off auto-commit so the next statements form one transaction. */
     protected void beginTransaction(Connection connection) throws LfrlmsException {
         try {
             connection.setAutoCommit(false);
@@ -29,6 +33,7 @@ abstract class AbstractService {
         }
     }
 
+    /** Commits the transaction, rolling back if the commit fails. */
     protected void commit(Connection connection) throws LfrlmsException {
         try {
             connection.commit();
@@ -38,6 +43,7 @@ abstract class AbstractService {
         }
     }
 
+    /** Rolls back, attaching any rollback failure to the original error. */
     protected void rollback(Connection connection, Throwable originalFailure) {
         try {
             connection.rollback();
@@ -46,6 +52,7 @@ abstract class AbstractService {
         }
     }
 
+    /** Wraps an SQL error in a DataAccessException. */
     protected LfrlmsException databaseFailure(String action, SQLException exception) {
         return new DataAccessException("Could not " + action + ".", exception);
     }

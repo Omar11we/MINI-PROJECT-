@@ -22,6 +22,8 @@ import lfrlms.util.DateUtil;
 /**
  * Purpose: Captures pickup or return details before a rental service call.
  * Concept: Swing dialogs, input parsing and small immutable result objects.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class RentalActionDialog extends JDialog {
     private static final DateTimeFormatter DATE_TIME_FORMAT =

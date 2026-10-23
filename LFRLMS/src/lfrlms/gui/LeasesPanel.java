@@ -34,6 +34,8 @@ import lfrlms.util.DateUtil;
 /**
  * Purpose: Schedules leases and manages their start and final status actions.
  * Concept: Paged Swing tables, status rendering and background service calls.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class LeasesPanel extends JPanel {
     private final LeaseService leaseService;

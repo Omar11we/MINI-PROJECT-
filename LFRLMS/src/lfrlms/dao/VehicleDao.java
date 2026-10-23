@@ -13,6 +13,8 @@ import lfrlms.util.QueryLog;
 /**
  * Purpose: Searches and persists vehicle rows using parameterized SQL.
  * Concept: PreparedStatement, pagination and an ORDER BY whitelist.
+ * Layer: DAO (data access).
+ * Rubric: JDBC CRUD, overloading.
  */
 public class VehicleDao extends AbstractDao {
     private static final String DISPLAY_STATUS_SQL = "CASE WHEN v.status = 'Available' "
@@ -38,6 +40,7 @@ public class VehicleDao extends AbstractDao {
         super(queryLog);
     }
 
+    /** Inserts a vehicle and returns its generated id. */
     public int insert(Vehicle vehicle) throws LfrlmsException {
         String sql = "INSERT INTO vehicle (registration_no, brand_id, category_id, branch_id, "
                 + "model, model_year, rental_rate, lease_rate, status) "
@@ -49,6 +52,7 @@ public class VehicleDao extends AbstractDao {
                 vehicle.getLeaseRate(), vehicle.getStatus());
     }
 
+    /** Inserts a vehicle on a caller-owned connection and returns its generated id. */
     public int insert(java.sql.Connection connection, Vehicle vehicle)
             throws LfrlmsException {
         String sql = "INSERT INTO vehicle (registration_no, brand_id, category_id, branch_id, "
@@ -61,6 +65,7 @@ public class VehicleDao extends AbstractDao {
                 vehicle.getLeaseRate(), vehicle.getStatus());
     }
 
+    /** Finds a vehicle by id with its stored status, or returns null. */
     public Vehicle findById(int vehicleId) throws LfrlmsException {
         String sql = "SELECT vehicle_id, registration_no, brand_id, category_id, branch_id, "
                 + "model, model_year, rental_rate, lease_rate, status, created_at, updated_at "
@@ -68,12 +73,14 @@ public class VehicleDao extends AbstractDao {
         return toVehicle(firstRow(queryRows(sql, Integer.valueOf(vehicleId))));
     }
 
+    /** Returns one sorted page of vehicles with no filters. */
     public ArrayList<Vehicle> findPage(String sortKey, boolean ascending,
             int pageNumber, int pageSize) throws LfrlmsException {
         return search(null, null, null, null, null, null, null, null, null,
                 null, null, sortKey, ascending, pageNumber, pageSize);
     }
 
+    /** Searches vehicles by text, lookups, status, rate ranges and availability window. */
     public ArrayList<Vehicle> search(String text, Integer brandId, Integer categoryId,
             Integer branchId, String status, BigDecimal minimumRentalRate,
             BigDecimal maximumRentalRate, BigDecimal minimumLeaseRate,
@@ -95,12 +102,14 @@ public class VehicleDao extends AbstractDao {
         return vehicles;
     }
 
+    /** Searches vehicles by text only, sorted by registration number. */
     public ArrayList<Vehicle> search(String text, int pageNumber, int pageSize)
             throws LfrlmsException {
         return search(text, null, null, null, null, null, null, null, null,
                 null, null, "registrationNo", true, pageNumber, pageSize);
     }
 
+    /** Counts vehicles that match the search filters. */
     public long countSearchResults(String text, Integer brandId, Integer categoryId,
             Integer branchId, String status, BigDecimal minimumRentalRate,
             BigDecimal maximumRentalRate, BigDecimal minimumLeaseRate,
@@ -116,10 +125,12 @@ public class VehicleDao extends AbstractDao {
         return queryCount(query.getSql(), query.getParameters().toArray());
     }
 
+    /** Counts all vehicles. */
     public long countAll() throws LfrlmsException {
         return queryCount("SELECT COUNT(*) AS row_count FROM vehicle");
     }
 
+    /** Lists vehicles free for a period using the sp_available_vehicles procedure. */
     public ArrayList<HashMap<String, Object>> findAvailableVehicles(
             java.time.LocalDateTime from, java.time.LocalDateTime to,
             Integer branchId, Integer categoryId) throws LfrlmsException {
@@ -127,6 +138,7 @@ public class VehicleDao extends AbstractDao {
         return callRows(call, from, to, branchId, categoryId);
     }
 
+    /** Updates a vehicle; returns true if a row was updated. */
     public boolean update(Vehicle vehicle) throws LfrlmsException {
         String sql = "UPDATE vehicle SET registration_no = ?, brand_id = ?, category_id = ?, "
                 + "branch_id = ?, model = ?, model_year = ?, rental_rate = ?, lease_rate = ?, "
@@ -139,6 +151,7 @@ public class VehicleDao extends AbstractDao {
                 Integer.valueOf(vehicle.getVehicleId())) > 0;
     }
 
+    /** Updates a vehicle on a caller-owned connection. */
     public boolean update(java.sql.Connection connection, Vehicle vehicle)
             throws LfrlmsException {
         String sql = "UPDATE vehicle SET registration_no = ?, brand_id = ?, category_id = ?, "
@@ -152,19 +165,23 @@ public class VehicleDao extends AbstractDao {
                 Integer.valueOf(vehicle.getVehicleId())) > 0;
     }
 
+    /** Deletes a vehicle by id; returns true if a row was removed. */
     public boolean delete(int vehicleId) throws LfrlmsException {
         return executeUpdate("DELETE FROM vehicle WHERE vehicle_id = ?",
                 Integer.valueOf(vehicleId)) > 0;
     }
 
+    /** Deletes a vehicle on a caller-owned connection. */
     public boolean delete(java.sql.Connection connection, int vehicleId)
             throws LfrlmsException {
         return executeUpdate(connection, "DELETE FROM vehicle WHERE vehicle_id = ?",
                 Integer.valueOf(vehicleId)) > 0;
     }
 
+    /** Reads a vehicle and locks its row for the caller's transaction. */
     public Vehicle lockByIdForUpdate(java.sql.Connection connection, int vehicleId)
             throws LfrlmsException {
+        // FOR UPDATE locks this row until the caller commits or rolls back
         String sql = "SELECT vehicle_id, registration_no, brand_id, category_id, branch_id, "
                 + "model, model_year, rental_rate, lease_rate, status, created_at, updated_at "
                 + "FROM vehicle WHERE vehicle_id = ? FOR UPDATE";

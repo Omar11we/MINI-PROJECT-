@@ -26,6 +26,8 @@ import lfrlms.util.QueryLog;
 /**
  * Purpose: Shows the SQL activity and database objects without editing them.
  * Concept: Read-only tables, background tasks and prepared diagnostics.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, StringBuffer.
  */
 public class DbmsInsightsPanel extends JPanel {
     private final InsightsService insightsService;

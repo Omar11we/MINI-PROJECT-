@@ -30,6 +30,8 @@ import lfrlms.util.DateUtil;
 /**
  * Purpose: Captures a maintenance request and vehicle choice.
  * Concept: Swing forms, copy-safe model input and asynchronous lookups.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class MaintenanceFormDialog extends JDialog {
     private static final Color ERROR_COLOR = new Color(150, 45, 35);

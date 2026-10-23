@@ -3,6 +3,8 @@ package lfrlms.util;
 /**
  * Purpose: Keeps shared labels and configuration keys in one place.
  * Concept: Static final constants.
+ * Layer: Utility.
+ * Rubric: static/final.
  */
 public final class Constants {
     public static final String CUSTOMER_INDIVIDUAL = "Individual";

@@ -12,6 +12,8 @@ import lfrlms.util.QueryLog;
 /**
  * Purpose: Reads and writes payment rows without calculating business balances.
  * Concept: JDBC CRUD, nullable references and server-side pagination.
+ * Layer: DAO (data access).
+ * Rubric: JDBC CRUD, overloading.
  */
 public class PaymentDao extends AbstractDao {
     private static final String PAYMENT_COLUMNS = "p.payment_id, p.rental_id, p.lease_id, "
@@ -33,6 +35,7 @@ public class PaymentDao extends AbstractDao {
         super(queryLog);
     }
 
+    /** Inserts a payment and returns its generated id. */
     public int insert(Payment payment) throws LfrlmsException {
         String sql = "INSERT INTO payment (rental_id, lease_id, amount, method, "
                 + "payment_date, status) VALUES (?, ?, ?, ?, ?, ?)";
@@ -41,6 +44,7 @@ public class PaymentDao extends AbstractDao {
                 payment.getStatus());
     }
 
+    /** Inserts a payment on a caller-owned connection and returns its generated id. */
     public int insert(java.sql.Connection connection, Payment payment)
             throws LfrlmsException {
         String sql = "INSERT INTO payment (rental_id, lease_id, amount, method, "
@@ -50,17 +54,20 @@ public class PaymentDao extends AbstractDao {
                 payment.getStatus());
     }
 
+    /** Finds a payment by id, or returns null. */
     public Payment findById(int paymentId) throws LfrlmsException {
         String sql = "SELECT " + PAYMENT_COLUMNS + "FROM payment p WHERE p.payment_id = ?";
         return toPayment(firstRow(queryRows(sql, Integer.valueOf(paymentId))));
     }
 
+    /** Returns one sorted page of payments with no filters. */
     public ArrayList<Payment> findPage(String sortKey, boolean ascending,
             int pageNumber, int pageSize) throws LfrlmsException {
         return search(null, null, null, null, false, sortKey, ascending,
                 pageNumber, pageSize);
     }
 
+    /** Searches payments by text, status, payment-date range and outstanding balance. */
     public ArrayList<Payment> search(String text, String status,
             LocalDateTime from, LocalDateTime to, boolean outstandingOnly,
             String sortKey, boolean ascending, int pageNumber, int pageSize)
@@ -79,6 +86,7 @@ public class PaymentDao extends AbstractDao {
         return payments;
     }
 
+    /** Counts payments that match the search filters. */
     public long countSearchResults(String text, String status,
             LocalDateTime from, LocalDateTime to, boolean outstandingOnly)
             throws LfrlmsException {
@@ -88,10 +96,12 @@ public class PaymentDao extends AbstractDao {
         return queryCount(query.getSql(), query.getParameters().toArray());
     }
 
+    /** Counts all payments. */
     public long countAll() throws LfrlmsException {
         return queryCount("SELECT COUNT(*) AS row_count FROM payment");
     }
 
+    /** Updates a payment; returns true if a row was updated. */
     public boolean update(Payment payment) throws LfrlmsException {
         String sql = "UPDATE payment SET rental_id = ?, lease_id = ?, amount = ?, method = ?, "
                 + "payment_date = ?, status = ? WHERE payment_id = ?";
@@ -100,6 +110,7 @@ public class PaymentDao extends AbstractDao {
                 payment.getStatus(), Integer.valueOf(payment.getPaymentId())) > 0;
     }
 
+    /** Updates a payment on a caller-owned connection. */
     public boolean update(java.sql.Connection connection, Payment payment)
             throws LfrlmsException {
         String sql = "UPDATE payment SET rental_id = ?, lease_id = ?, amount = ?, method = ?, "
@@ -109,11 +120,13 @@ public class PaymentDao extends AbstractDao {
                 payment.getStatus(), Integer.valueOf(payment.getPaymentId())) > 0;
     }
 
+    /** Deletes a payment by id; returns true if a row was removed. */
     public boolean delete(int paymentId) throws LfrlmsException {
         return executeUpdate("DELETE FROM payment WHERE payment_id = ?",
                 Integer.valueOf(paymentId)) > 0;
     }
 
+    /** Deletes a payment on a caller-owned connection. */
     public boolean delete(java.sql.Connection connection, int paymentId)
             throws LfrlmsException {
         return executeUpdate(connection, "DELETE FROM payment WHERE payment_id = ?",

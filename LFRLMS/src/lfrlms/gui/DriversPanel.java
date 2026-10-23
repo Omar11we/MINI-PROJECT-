@@ -22,6 +22,8 @@ import lfrlms.service.DriverService;
 /**
  * Purpose: Lists, edits, deactivates and deletes chauffeur records.
  * Concept: Paged Swing tables, listeners and CRUD service calls.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class DriversPanel extends JPanel {
     private final DriverService driverService;

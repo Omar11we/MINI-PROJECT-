@@ -9,6 +9,8 @@ import lfrlms.util.Constants;
 /**
  * Purpose: Represents a vehicle lease and its monthly charges.
  * Concept: Inheritance, super constructors, polymorphism and BigDecimal.
+ * Layer: Model.
+ * Rubric: Inheritance.
  */
 public class Lease extends Contract {
     private LocalDate startDate;

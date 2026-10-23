@@ -9,8 +9,11 @@ import lfrlms.model.Rental;
 import lfrlms.util.Constants;
 import lfrlms.util.Validator;
 
+// Layer: Service (business logic).
+// Rubric: interfaces/abstract classes.
 /** Provides Java-side billable estimates through the shared Billable interface. */
 public class BillingService {
+    /** Returns the charge calculated by any Billable contract. */
     public BigDecimal estimate(Billable billable) throws ValidationException {
         if (billable == null) {
             throw new ValidationException("A billable contract is required.");
@@ -22,6 +25,7 @@ public class BillingService {
         return amount;
     }
 
+    /** Estimates a rental charge from its dates and daily rate. */
     public BigDecimal estimateRental(LocalDateTime start, LocalDateTime end,
             BigDecimal dailyRate) throws ValidationException, InvalidDateRangeException {
         if (!Validator.isValid(start, end)) {

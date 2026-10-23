@@ -30,6 +30,8 @@ import lfrlms.util.Constants;
 /**
  * Purpose: Records one payment against either a rental or a lease.
  * Concept: Dynamic Swing forms, wrapper references and BigDecimal input.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, wrapper classes.
  */
 public class PaymentFormDialog extends JDialog {
     private final PaymentService paymentService;

@@ -12,6 +12,8 @@ import javax.swing.JPanel;
 /**
  * Purpose: Moves through server-paged result sets without loading every row.
  * Concept: Swing controls and event listeners.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, interfaces/abstract classes.
  */
 public class PaginationBar extends JPanel {
     public interface PageChangeListener {

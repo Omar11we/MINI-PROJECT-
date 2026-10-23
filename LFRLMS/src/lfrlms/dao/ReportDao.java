@@ -13,6 +13,8 @@ import lfrlms.util.QueryLog;
 /**
  * Purpose: Runs the parameterized report queries listed in the project spec.
  * Concept: JDBC reports, callable statements, aggregation and TreeMap.
+ * Layer: DAO (data access).
+ * Rubric: JDBC CRUD, Collections.
  */
 public class ReportDao extends AbstractDao {
     private static final String ACTIVE_RENTALS_FROM = "FROM rental r "
@@ -44,6 +46,7 @@ public class ReportDao extends AbstractDao {
         super(queryLog);
     }
 
+    /** Lists vehicles free for a period using the sp_available_vehicles procedure. */
     public ArrayList<HashMap<String, Object>> availableVehicles(LocalDateTime from,
             LocalDateTime to, Integer branchId, Integer categoryId)
             throws LfrlmsException {
@@ -51,6 +54,7 @@ public class ReportDao extends AbstractDao {
                 from, to, branchId, categoryId);
     }
 
+    /** Returns one page of active rentals with customer and vehicle details. */
     public ArrayList<HashMap<String, Object>> activeRentals(int pageNumber,
             int pageSize) throws LfrlmsException {
         String sql = "SELECT r.rental_id, c.customer_id, c.first_name, c.last_name, "
@@ -61,10 +65,12 @@ public class ReportDao extends AbstractDao {
         return queryRows(sql, "Active", safePageSize(pageSize), pageOffset(pageNumber, pageSize));
     }
 
+    /** Counts active rentals. */
     public long countActiveRentals() throws LfrlmsException {
         return queryCount("SELECT COUNT(*) AS row_count " + ACTIVE_RENTALS_FROM, "Active");
     }
 
+    /** Returns one page of active leases, earliest end date first. */
     public ArrayList<HashMap<String, Object>> activeLeases(int pageNumber,
             int pageSize) throws LfrlmsException {
         String sql = "SELECT l.lease_id, c.customer_id, c.first_name, c.last_name, "
@@ -74,10 +80,12 @@ public class ReportDao extends AbstractDao {
         return queryRows(sql, "Active", safePageSize(pageSize), pageOffset(pageNumber, pageSize));
     }
 
+    /** Counts active leases. */
     public long countActiveLeases() throws LfrlmsException {
         return queryCount("SELECT COUNT(*) AS row_count " + ACTIVE_LEASES_FROM, "Active");
     }
 
+    /** Totals successful payments per month in a date range, sorted by month. */
     public TreeMap<String, BigDecimal> revenueByMonth(LocalDate from, LocalDate to)
             throws LfrlmsException {
         String sql = "SELECT DATE_FORMAT(payment_date, '%Y-%m') AS revenue_month, "
@@ -93,6 +101,7 @@ public class ReportDao extends AbstractDao {
         return revenue;
     }
 
+    /** Returns one page of customers with their outstanding balance. */
     public ArrayList<HashMap<String, Object>> outstandingBalances(int pageNumber,
             int pageSize) throws LfrlmsException {
         String sql = "SELECT customer_id, customer_type, first_name, last_name "
@@ -109,10 +118,12 @@ public class ReportDao extends AbstractDao {
         return balances;
     }
 
+    /** Counts the customers listed in the outstanding-balance report. */
     public long countOutstandingBalances() throws LfrlmsException {
         return queryCount("SELECT COUNT(*) AS row_count FROM customer");
     }
 
+    /** Ranks vehicles by their number of active and completed rentals. */
     public ArrayList<HashMap<String, Object>> mostRentedVehicles(int limit)
             throws LfrlmsException {
         String sql = "SELECT v.vehicle_id, v.registration_no, b.brand_name, v.model, "
@@ -125,6 +136,7 @@ public class ReportDao extends AbstractDao {
         return queryRows(sql, Integer.valueOf(safePageSize(limit)));
     }
 
+    /** Returns one page of maintenance whose next service date is on or before a date. */
     public ArrayList<HashMap<String, Object>> maintenanceDue(LocalDate throughDate,
             int pageNumber, int pageSize) throws LfrlmsException {
         String sql = "SELECT m.maintenance_id, m.vehicle_id, v.registration_no, v.model, "
@@ -136,6 +148,7 @@ public class ReportDao extends AbstractDao {
                 pageOffset(pageNumber, pageSize));
     }
 
+    /** Counts maintenance whose next service date is on or before a date. */
     public long countMaintenanceDue(LocalDate throughDate) throws LfrlmsException {
         String sql = "SELECT COUNT(*) AS row_count FROM maintenance m "
                 + "JOIN vehicle v ON v.vehicle_id = m.vehicle_id "
@@ -143,6 +156,7 @@ public class ReportDao extends AbstractDao {
         return queryCount(sql, throughDate);
     }
 
+    /** Returns one page of a customer's rentals, leases and payments, newest first. */
     public ArrayList<HashMap<String, Object>> customerTransactionHistory(int customerId,
             int pageNumber, int pageSize) throws LfrlmsException {
         String sql = "SELECT * FROM (" + CUSTOMER_HISTORY_ROWS
@@ -153,6 +167,7 @@ public class ReportDao extends AbstractDao {
                 Long.valueOf(pageOffset(pageNumber, pageSize)));
     }
 
+    /** Counts a customer's rentals, leases and payments. */
     public long countCustomerTransactionHistory(int customerId) throws LfrlmsException {
         String sql = "SELECT COUNT(*) AS row_count FROM (" + CUSTOMER_HISTORY_ROWS
                 + ") history";
@@ -160,6 +175,7 @@ public class ReportDao extends AbstractDao {
                 Integer.valueOf(customerId));
     }
 
+    /** Counts rentals grouped by status. */
     public ArrayList<HashMap<String, Object>> rentalStatusSummary()
             throws LfrlmsException {
         String sql = "SELECT status, COUNT(*) AS rental_count FROM rental "
@@ -167,12 +183,14 @@ public class ReportDao extends AbstractDao {
         return queryRows(sql);
     }
 
+    /** Returns a customer's balance from fn_customer_outstanding. */
     public BigDecimal customerOutstanding(int customerId) throws LfrlmsException {
         String sql = "{? = call fn_customer_outstanding(?)}";
         Object value = callScalarFunction(sql, Types.DECIMAL, Integer.valueOf(customerId));
         return value instanceof BigDecimal ? (BigDecimal) value : BigDecimal.ZERO;
     }
 
+    /** Calculates a rental charge with fn_rental_charge. */
     public BigDecimal rentalCharge(LocalDateTime start, LocalDateTime end,
             BigDecimal dailyRate) throws LfrlmsException {
         String sql = "{? = call fn_rental_charge(?, ?, ?)}";
@@ -180,6 +198,7 @@ public class ReportDao extends AbstractDao {
         return value instanceof BigDecimal ? (BigDecimal) value : BigDecimal.ZERO;
     }
 
+    /** Calculates a lease total with fn_lease_total. */
     public BigDecimal leaseTotal(BigDecimal monthlyCharge, LocalDate start,
             LocalDate end) throws LfrlmsException {
         String sql = "{? = call fn_lease_total(?, ?, ?)}";

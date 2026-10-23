@@ -6,6 +6,8 @@ import java.util.logging.Logger;
 /**
  * Purpose: Records diagnostic details without showing raw failures as user messages.
  * Concept: Static members and exception logging.
+ * Layer: Utility.
+ * Rubric: static/final.
  */
 public final class AppLogger {
     private static final Logger LOGGER = Logger.getLogger("lfrlms");

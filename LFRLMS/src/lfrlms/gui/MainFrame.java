@@ -21,6 +21,8 @@ import lfrlms.util.AppLogger;
 /**
  * Purpose: Hosts the application modules and a live database status bar.
  * Concept: Swing tabs, layout managers and safe window shutdown.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, Thread.
  */
 public class MainFrame extends JFrame {
     private final JLabel clockLabel;
@@ -140,9 +142,12 @@ public class MainFrame extends JFrame {
     }
 
     private void stopBackgroundThreads() {
+        // Ask both loops to stop; the volatile flags make this visible at once
         clockThread.requestStop();
         alertMonitor.requestStop();
+        // Wake the alert thread from its 60-second sleep (requestStop interrupts the clock)
         alertMonitorThread.interrupt();
+        // Wait at most 500 ms per thread so closing the window cannot hang
         joinBriefly(clockThread);
         joinBriefly(alertMonitorThread);
     }

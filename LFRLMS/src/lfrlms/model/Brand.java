@@ -3,6 +3,8 @@ package lfrlms.model;
 /**
  * Purpose: Represents a vehicle manufacturer.
  * Concept: Encapsulation and copy construction.
+ * Layer: Model.
+ * Rubric: constructors, overloading.
  */
 public class Brand {
     private int brandId;

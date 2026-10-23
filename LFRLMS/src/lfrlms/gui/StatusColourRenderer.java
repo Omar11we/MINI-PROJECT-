@@ -8,6 +8,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 /**
  * Purpose: Gives vehicle status values a clear visual meaning in tables.
  * Concept: Swing renderer and conditional display.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, Inheritance.
  */
 public class StatusColourRenderer extends DefaultTableCellRenderer {
     private static final Color GREEN = new Color(220, 245, 226);

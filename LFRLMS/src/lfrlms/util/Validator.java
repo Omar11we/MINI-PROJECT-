@@ -8,6 +8,8 @@ import java.util.regex.Pattern;
 /**
  * Purpose: Validates common text, identifier and date inputs before persistence.
  * Concept: Static utility methods and method overloading.
+ * Layer: Utility.
+ * Rubric: overloading, wrapper classes.
  */
 public final class Validator {
     private static final String EMAIL_REGEX =

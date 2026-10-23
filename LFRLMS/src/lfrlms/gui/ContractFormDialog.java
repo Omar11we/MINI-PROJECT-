@@ -41,6 +41,8 @@ import lfrlms.util.DateUtil;
 /**
  * Purpose: Creates a scheduled lease, rental reservation or walk-in rental.
  * Concept: Swing dialog, service calls and polymorphic contract models.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class ContractFormDialog extends JDialog {
     private static final Color ERROR_COLOR = new Color(150, 45, 35);

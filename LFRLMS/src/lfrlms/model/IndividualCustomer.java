@@ -7,6 +7,8 @@ import lfrlms.util.Constants;
 /**
  * Purpose: Adds personal identity and licence details for an individual.
  * Concept: Inheritance, super constructors and encapsulation.
+ * Layer: Model.
+ * Rubric: Inheritance, constructors.
  */
 public class IndividualCustomer extends Customer {
     private LocalDate dateOfBirth;

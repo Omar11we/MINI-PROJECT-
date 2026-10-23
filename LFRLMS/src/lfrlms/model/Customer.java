@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 /**
  * Purpose: Holds fields shared by individual and corporate customers.
  * Concept: Abstract class and encapsulation.
+ * Layer: Model.
+ * Rubric: interfaces/abstract classes.
  */
 public abstract class Customer {
     private int customerId;

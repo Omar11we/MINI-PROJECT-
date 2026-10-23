@@ -21,6 +21,8 @@ import lfrlms.util.DateUtil;
 /**
  * Purpose: Shows vehicle facts and its next confirmed reservations.
  * Concept: Swing detail views and background service calls.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class VehicleDetailsDialog extends JDialog {
     private final Vehicle vehicle;

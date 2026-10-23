@@ -20,6 +20,8 @@ import lfrlms.model.Vehicle;
 import lfrlms.util.Constants;
 import lfrlms.util.Validator;
 
+// Layer: Service (business logic).
+// Rubric: Collections, Inheritance.
 /** Applies the shared date-overlap rule to vehicle and chauffeur assignments. */
 public class AvailabilityService extends AbstractService {
     private static final int PAGE_SIZE = 100;
@@ -43,6 +45,7 @@ public class AvailabilityService extends AbstractService {
         this.driverDao = driverDao;
     }
 
+    /** Checks the date range, then lists vehicles free for that period. */
     public ArrayList<HashMap<String, Object>> searchAvailableVehicles(
             LocalDateTime from, LocalDateTime to, Integer branchId, Integer categoryId)
             throws LfrlmsException {
@@ -50,6 +53,7 @@ public class AvailabilityService extends AbstractService {
         return vehicleDao.findAvailableVehicles(from, to, branchId, categoryId);
     }
 
+    /** Checks a vehicle is free for a period, skipping the given contracts. */
     public boolean isVehicleAvailable(int vehicleId, LocalDateTime from,
             LocalDateTime to, Integer ignoredRentalId, Integer ignoredLeaseId)
             throws LfrlmsException {
@@ -68,6 +72,7 @@ public class AvailabilityService extends AbstractService {
         return !hasMaintenanceOverlap(vehicleId, from, to);
     }
 
+    /** Checks a chauffeur is active and has no overlapping rental. */
     public boolean isDriverAvailable(int driverId, LocalDateTime from,
             LocalDateTime to, Integer ignoredRentalId) throws LfrlmsException {
         validateRange(from, to);

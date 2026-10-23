@@ -18,6 +18,8 @@ import lfrlms.model.Rental;
 import lfrlms.util.Constants;
 import lfrlms.util.Validator;
 
+// Layer: Service (business logic).
+// Rubric: JDBC CRUD, Exception handling.
 /** Applies payment reference, positive-amount and outstanding-balance rules. */
 public class PaymentService extends AbstractService {
     private static final int PAGE_SIZE = 100;
@@ -38,11 +40,14 @@ public class PaymentService extends AbstractService {
         this.reportDao = reportDao;
     }
 
+    /** Records a payment after locking its rental or lease and checking the balance. */
     public int recordPayment(Payment payment) throws LfrlmsException {
         validateShape(payment);
         try (Connection connection = openConnection()) {
             beginTransaction(connection);
             try {
+                // Lock the rental or lease row (SELECT ... FOR UPDATE) so two
+                // payments cannot both pass the balance check
                 if (payment.getRentalId() != null) {
                     if (rentalDao.lockByIdForUpdate(connection,
                             payment.getRentalId().intValue()) == null) {
@@ -68,10 +73,12 @@ public class PaymentService extends AbstractService {
         }
     }
 
+    /** Returns a customer's outstanding balance from the database function. */
     public BigDecimal customerOutstanding(int customerId) throws LfrlmsException {
         return reportDao.customerOutstanding(customerId);
     }
 
+    /** Searches payments one page at a time. */
     public ArrayList<Payment> search(String text, String status, LocalDateTime from,
             LocalDateTime to, boolean outstandingOnly, String sortKey,
             boolean ascending, int pageNumber, int pageSize) throws LfrlmsException {
@@ -79,11 +86,13 @@ public class PaymentService extends AbstractService {
                 sortKey, ascending, pageNumber, pageSize);
     }
 
+    /** Counts payments that match the search filters. */
     public long countSearchResults(String text, String status, LocalDateTime from,
             LocalDateTime to, boolean outstandingOnly) throws LfrlmsException {
         return paymentDao.countSearchResults(text, status, from, to, outstandingOnly);
     }
 
+    /** Lists active and completed rentals that can take payments. */
     public ArrayList<Rental> listBillableRentals() throws LfrlmsException {
         ArrayList<Rental> result = new ArrayList<Rental>();
         appendRentalsByStatus(result, Constants.RENTAL_ACTIVE);
@@ -91,6 +100,7 @@ public class PaymentService extends AbstractService {
         return result;
     }
 
+    /** Lists active and completed leases that can take payments. */
     public ArrayList<Lease> listBillableLeases() throws LfrlmsException {
         ArrayList<Lease> result = new ArrayList<Lease>();
         appendLeasesByStatus(result, Constants.LEASE_ACTIVE);
@@ -98,6 +108,7 @@ public class PaymentService extends AbstractService {
         return result;
     }
 
+    /** Returns the unpaid amount on a rental. */
     public BigDecimal rentalOutstanding(int rentalId) throws LfrlmsException {
         Rental rental = rentalDao.findById(rentalId);
         if (rental == null) {
@@ -106,6 +117,7 @@ public class PaymentService extends AbstractService {
         return outstandingForRental(rental, null);
     }
 
+    /** Returns the unpaid amount on a lease. */
     public BigDecimal leaseOutstanding(int leaseId) throws LfrlmsException {
         Lease lease = leaseDao.findById(leaseId);
         if (lease == null) {
@@ -114,6 +126,7 @@ public class PaymentService extends AbstractService {
         return outstandingForLease(lease, null);
     }
 
+    /** Marks a successful payment as refunded. */
     public void refund(int paymentId) throws LfrlmsException {
         Payment payment = paymentDao.findById(paymentId);
         if (payment == null || Constants.PAYMENT_REFUNDED.equals(payment.getStatus())) {

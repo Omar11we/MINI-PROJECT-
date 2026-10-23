@@ -9,6 +9,8 @@ import java.util.Queue;
 /**
  * Purpose: Keeps a bounded history of SQL activity for diagnostics.
  * Concept: Queue collections, a private nested class and synchronized methods.
+ * Layer: Utility.
+ * Rubric: Collections, inner/anonymous classes.
  */
 public class QueryLog {
     private static final int MAX_ENTRIES = 200;

@@ -8,6 +8,8 @@ import lfrlms.util.AppLogger;
 /**
  * Purpose: Converts service failures into helpful messages for staff.
  * Concept: Exception handling and reusable Swing dialogs.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, Exception handling.
  */
 public final class GuiSupport {
     private GuiSupport() {

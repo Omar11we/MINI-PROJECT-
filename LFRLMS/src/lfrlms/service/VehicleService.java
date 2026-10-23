@@ -10,6 +10,8 @@ import lfrlms.model.Vehicle;
 import lfrlms.util.Constants;
 import lfrlms.util.Validator;
 
+// Layer: Service (business logic).
+// Rubric: Exception handling.
 /** Validates vehicle data while leaving rental and lease status transitions to their owners. */
 public class VehicleService {
     private final VehicleDao vehicleDao;
@@ -22,6 +24,7 @@ public class VehicleService {
         this.vehicleDao = vehicleDao;
     }
 
+    /** Validates and saves a vehicle; new ones start Available, edits keep their status. */
     public int save(Vehicle vehicle) throws LfrlmsException {
         validate(vehicle);
         if (vehicle.getVehicleId() <= 0) {
@@ -39,6 +42,7 @@ public class VehicleService {
         return vehicle.getVehicleId();
     }
 
+    /** Marks a vehicle inactive. */
     public void deactivate(int vehicleId) throws LfrlmsException {
         Vehicle vehicle = vehicleDao.findById(vehicleId);
         if (vehicle == null) {
@@ -48,14 +52,17 @@ public class VehicleService {
         vehicleDao.update(vehicle);
     }
 
+    /** Deletes a vehicle by id. */
     public boolean delete(int vehicleId) throws LfrlmsException {
         return vehicleDao.delete(vehicleId);
     }
 
+    /** Finds a vehicle by id, or returns null. */
     public Vehicle findById(int vehicleId) throws LfrlmsException {
         return vehicleDao.findById(vehicleId);
     }
 
+    /** Searches vehicles one page at a time. */
     public ArrayList<Vehicle> search(String text, Integer brandId, Integer categoryId,
             Integer branchId, String status, BigDecimal minimumRentalRate,
             BigDecimal maximumRentalRate, BigDecimal minimumLeaseRate,
@@ -67,6 +74,7 @@ public class VehicleService {
                 availableFrom, availableTo, sortKey, ascending, pageNumber, pageSize);
     }
 
+    /** Counts vehicles that match the search filters. */
     public long countSearchResults(String text, Integer brandId, Integer categoryId,
             Integer branchId, String status, BigDecimal minimumRentalRate,
             BigDecimal maximumRentalRate, BigDecimal minimumLeaseRate,

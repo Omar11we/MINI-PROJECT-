@@ -13,6 +13,8 @@ import lfrlms.util.QueryLog;
 /**
  * Purpose: Reads and writes lease rows without applying lifecycle rules.
  * Concept: JDBC CRUD and server-side pagination.
+ * Layer: DAO (data access).
+ * Rubric: JDBC CRUD, overloading.
  */
 public class LeaseDao extends AbstractDao {
     private static final String LEASE_COLUMNS = "l.lease_id, l.customer_id, l.vehicle_id, "
@@ -32,6 +34,7 @@ public class LeaseDao extends AbstractDao {
         super(queryLog);
     }
 
+    /** Inserts a lease and returns its generated id. */
     public int insert(Lease lease) throws LfrlmsException {
         String sql = "INSERT INTO lease (customer_id, vehicle_id, start_date, end_date, "
                 + "monthly_charge, deposit, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -40,6 +43,7 @@ public class LeaseDao extends AbstractDao {
                 lease.getMonthlyCharge(), lease.getDeposit(), lease.getStatus());
     }
 
+    /** Inserts a lease on a caller-owned connection and returns its generated id. */
     public int insert(java.sql.Connection connection, Lease lease)
             throws LfrlmsException {
         String sql = "INSERT INTO lease (customer_id, vehicle_id, start_date, end_date, "
@@ -49,24 +53,29 @@ public class LeaseDao extends AbstractDao {
                 lease.getMonthlyCharge(), lease.getDeposit(), lease.getStatus());
     }
 
+    /** Finds a lease by id, or returns null. */
     public Lease findById(int leaseId) throws LfrlmsException {
         String sql = "SELECT " + LEASE_COLUMNS + "FROM lease l WHERE l.lease_id = ?";
         return toLease(firstRow(queryRows(sql, Integer.valueOf(leaseId))));
     }
 
+    /** Reads a lease and locks its row for the caller's transaction. */
     public Lease lockByIdForUpdate(Connection connection, int leaseId)
             throws LfrlmsException {
+        // FOR UPDATE locks this row until the caller commits or rolls back
         String sql = "SELECT " + LEASE_COLUMNS
                 + "FROM lease l WHERE l.lease_id = ? FOR UPDATE";
         return toLease(firstRow(queryRows(connection, sql, Integer.valueOf(leaseId))));
     }
 
+    /** Returns one sorted page of leases with no filters. */
     public ArrayList<Lease> findPage(String sortKey, boolean ascending,
             int pageNumber, int pageSize) throws LfrlmsException {
         return search(null, null, null, null, false, sortKey, ascending,
                 pageNumber, pageSize);
     }
 
+    /** Searches leases by text, status, start-date range and outstanding balance. */
     public ArrayList<Lease> search(String text, String status, LocalDate from,
             LocalDate to, boolean outstandingOnly, String sortKey, boolean ascending,
             int pageNumber, int pageSize) throws LfrlmsException {
@@ -84,6 +93,7 @@ public class LeaseDao extends AbstractDao {
         return leases;
     }
 
+    /** Counts leases that match the search filters. */
     public long countSearchResults(String text, String status, LocalDate from,
             LocalDate to, boolean outstandingOnly) throws LfrlmsException {
         QueryBuilder query = new QueryBuilder("SELECT COUNT(*) AS row_count "
@@ -92,10 +102,12 @@ public class LeaseDao extends AbstractDao {
         return queryCount(query.getSql(), query.getParameters().toArray());
     }
 
+    /** Counts all leases. */
     public long countAll() throws LfrlmsException {
         return queryCount("SELECT COUNT(*) AS row_count FROM lease");
     }
 
+    /** Updates a lease; returns true if a row was updated. */
     public boolean update(Lease lease) throws LfrlmsException {
         String sql = "UPDATE lease SET customer_id = ?, vehicle_id = ?, start_date = ?, "
                 + "end_date = ?, monthly_charge = ?, deposit = ?, status = ? "
@@ -106,6 +118,7 @@ public class LeaseDao extends AbstractDao {
                 Integer.valueOf(lease.getLeaseId())) > 0;
     }
 
+    /** Updates a lease on a caller-owned connection. */
     public boolean update(java.sql.Connection connection, Lease lease)
             throws LfrlmsException {
         String sql = "UPDATE lease SET customer_id = ?, vehicle_id = ?, start_date = ?, "
@@ -117,11 +130,13 @@ public class LeaseDao extends AbstractDao {
                 Integer.valueOf(lease.getLeaseId())) > 0;
     }
 
+    /** Deletes a lease by id; returns true if a row was removed. */
     public boolean delete(int leaseId) throws LfrlmsException {
         return executeUpdate("DELETE FROM lease WHERE lease_id = ?",
                 Integer.valueOf(leaseId)) > 0;
     }
 
+    /** Deletes a lease on a caller-owned connection. */
     public boolean delete(java.sql.Connection connection, int leaseId)
             throws LfrlmsException {
         return executeUpdate(connection, "DELETE FROM lease WHERE lease_id = ?",

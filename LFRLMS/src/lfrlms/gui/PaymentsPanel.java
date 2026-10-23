@@ -34,6 +34,8 @@ import lfrlms.util.DateUtil;
 /**
  * Purpose: Searches paginated payments and records or refunds payments through the service.
  * Concept: Swing filters, status rendering and background service calls.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class PaymentsPanel extends JPanel {
     private final PaymentService paymentService;

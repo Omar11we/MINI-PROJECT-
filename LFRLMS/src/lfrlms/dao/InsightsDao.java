@@ -16,6 +16,8 @@ import lfrlms.util.QueryLog;
 /**
  * Purpose: Reads database metadata and explains logged SELECT statements.
  * Concept: PreparedStatement, metadata and allowlisted identifiers.
+ * Layer: DAO (data access).
+ * Rubric: JDBC CRUD, Exception handling.
  */
 public class InsightsDao extends AbstractDao {
     private static final String[] TABLE_NAMES = new String[] {
@@ -28,6 +30,7 @@ public class InsightsDao extends AbstractDao {
         super(QueryLog.getShared());
     }
 
+    /** Returns the allowlisted application table names. */
     public ArrayList<String> listTableNames() {
         ArrayList<String> names = new ArrayList<String>();
         for (String tableName : TABLE_NAMES) {
@@ -36,10 +39,12 @@ public class InsightsDao extends AbstractDao {
         return names;
     }
 
+    /** Returns the logged SQL statements, newest first. */
     public ArrayList<QueryLog.QueryEntry> recentQueries() {
         return queryLog.getRecentRecords();
     }
 
+    /** Runs EXPLAIN FORMAT=TREE on a logged SELECT with its original parameters. */
     public ArrayList<HashMap<String, Object>> explain(QueryLog.QueryEntry entry)
             throws LfrlmsException {
         String selectSql = validatedSelect(entry);
@@ -56,6 +61,7 @@ public class InsightsDao extends AbstractDao {
         }
     }
 
+    /** Returns the CREATE TABLE statement for an allowlisted table. */
     public String showCreateTable(String tableName) throws LfrlmsException {
         if (!isAllowedTable(tableName)) {
             throw new ValidationException("Choose one of the listed database tables.");
@@ -67,6 +73,7 @@ public class InsightsDao extends AbstractDao {
         return definition == null ? "Table definition is unavailable." : definition.toString();
     }
 
+    /** Lists the views in the current schema. */
     public ArrayList<HashMap<String, Object>> listViews() throws LfrlmsException {
         String sql = "SELECT TABLE_NAME AS object_name, VIEW_DEFINITION AS definition "
                 + "FROM information_schema.VIEWS WHERE TABLE_SCHEMA = DATABASE() "
@@ -74,6 +81,7 @@ public class InsightsDao extends AbstractDao {
         return queryRows(sql);
     }
 
+    /** Lists the stored functions or procedures in the current schema. */
     public ArrayList<HashMap<String, Object>> listRoutines(String routineType)
             throws LfrlmsException {
         if (!"FUNCTION".equals(routineType) && !"PROCEDURE".equals(routineType)) {
@@ -85,6 +93,7 @@ public class InsightsDao extends AbstractDao {
         return queryRows(sql, routineType);
     }
 
+    /** Lists the triggers in the current schema. */
     public ArrayList<HashMap<String, Object>> listTriggers() throws LfrlmsException {
         String sql = "SELECT TRIGGER_NAME AS object_name, "
                 + "CONCAT(ACTION_TIMING, ' ', EVENT_MANIPULATION, ' ON ', EVENT_OBJECT_TABLE, "

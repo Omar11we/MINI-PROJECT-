@@ -7,6 +7,8 @@ import lfrlms.util.Constants;
 /**
  * Purpose: Represents a fleet vehicle and its optional rental or lease rates.
  * Concept: Encapsulation, wrapper classes and copy construction.
+ * Layer: Model.
+ * Rubric: constructors, overloading.
  */
 public class Vehicle {
     private int vehicleId;

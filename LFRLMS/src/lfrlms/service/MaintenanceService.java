@@ -15,6 +15,8 @@ import lfrlms.model.Vehicle;
 import lfrlms.util.Constants;
 import lfrlms.util.Validator;
 
+// Layer: Service (business logic).
+// Rubric: JDBC CRUD, Exception handling.
 /** Opens and completes maintenance with matching vehicle-status transactions. */
 public class MaintenanceService extends AbstractService {
     private final MaintenanceDao maintenanceDao;
@@ -32,6 +34,7 @@ public class MaintenanceService extends AbstractService {
         this.rentalDao = rentalDao;
     }
 
+    /** Opens maintenance on a vehicle and returns its rentals booked from the service date. */
     public ArrayList<Rental> openMaintenance(Maintenance maintenance)
             throws LfrlmsException {
         validate(maintenance);
@@ -40,6 +43,7 @@ public class MaintenanceService extends AbstractService {
         try (Connection connection = openConnection()) {
             beginTransaction(connection);
             try {
+                // Lock the vehicle row (SELECT ... FOR UPDATE) until we commit
                 Vehicle vehicle = vehicleDao.lockByIdForUpdate(connection,
                         maintenance.getVehicleId());
                 if (vehicle == null || Constants.VEHICLE_RENTED.equals(vehicle.getStatus())
@@ -66,6 +70,7 @@ public class MaintenanceService extends AbstractService {
         }
     }
 
+    /** Completes in-progress maintenance and makes the vehicle Available again. */
     public void completeMaintenance(int maintenanceId, LocalDate completedDate)
             throws LfrlmsException {
         if (completedDate == null) {
@@ -78,6 +83,7 @@ public class MaintenanceService extends AbstractService {
         try (Connection connection = openConnection()) {
             beginTransaction(connection);
             try {
+                // Lock the vehicle row (SELECT ... FOR UPDATE) until we commit
                 Vehicle vehicle = vehicleDao.lockByIdForUpdate(connection, initial.getVehicleId());
                 Maintenance maintenance = maintenanceDao.findById(maintenanceId);
                 if (maintenance == null
@@ -104,6 +110,7 @@ public class MaintenanceService extends AbstractService {
         }
     }
 
+    /** Searches maintenance records one page at a time. */
     public ArrayList<Maintenance> search(String text, String status,
             LocalDate serviceFrom, LocalDate serviceTo, String sortKey,
             boolean ascending, int pageNumber, int pageSize) throws LfrlmsException {
@@ -111,6 +118,7 @@ public class MaintenanceService extends AbstractService {
                 sortKey, ascending, pageNumber, pageSize);
     }
 
+    /** Counts maintenance records that match the search filters. */
     public long countSearchResults(String text, String status, LocalDate serviceFrom,
             LocalDate serviceTo) throws LfrlmsException {
         return maintenanceDao.countSearchResults(text, status, serviceFrom, serviceTo);

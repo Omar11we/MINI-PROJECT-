@@ -33,6 +33,8 @@ import lfrlms.util.DateUtil;
 /**
  * Purpose: Presents the nine database reports with filters and CSV export.
  * Concept: Swing tabs, shared table models and background service calls.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class ReportsPanel extends JPanel {
     private final ReportService reportService;

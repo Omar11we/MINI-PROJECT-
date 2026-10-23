@@ -23,6 +23,8 @@ import lfrlms.util.Constants;
 /**
  * Purpose: Captures or edits chauffeur contact and licence details.
  * Concept: Swing forms and copy constructors.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class DriverFormDialog extends JDialog {
     private final Driver driver;

@@ -29,6 +29,8 @@ import lfrlms.util.Validator;
 /**
  * Purpose: Edits a copy of a vehicle and returns it only after valid input.
  * Concept: Swing dialog, validation and copy constructors.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class VehicleFormDialog extends JDialog {
     private final Vehicle vehicle;

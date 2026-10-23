@@ -5,6 +5,8 @@ import lfrlms.util.Constants;
 /**
  * Purpose: Represents a chauffeur who can be assigned to a corporate rental.
  * Concept: Encapsulation and copy construction.
+ * Layer: Model.
+ * Rubric: constructors, overloading.
  */
 public class Driver {
     private int driverId;

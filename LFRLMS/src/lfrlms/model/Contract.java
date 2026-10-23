@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 /**
  * Purpose: Holds identifiers shared by rental and lease contracts.
  * Concept: Abstract class, interface implementation and inheritance.
+ * Layer: Model.
+ * Rubric: interfaces/abstract classes, Inheritance.
  */
 public abstract class Contract implements Billable {
     private int contractId;

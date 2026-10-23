@@ -29,6 +29,8 @@ import lfrlms.util.Validator;
 /**
  * Purpose: Edits common contact fields and the selected customer subtype.
  * Concept: Polymorphism, CardLayout and copy constructors.
+ * Layer: GUI (presentation).
+ * Rubric: GUI, inner/anonymous classes.
  */
 public class CustomerFormDialog extends JDialog {
     private final Customer original;
