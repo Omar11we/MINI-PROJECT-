@@ -4,7 +4,7 @@ services:
   - type: web
     name: lfrlms
     runtime: node
-    rootDir: web-ui
+    rootDir: LFRLMS/web-ui
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/health
